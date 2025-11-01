@@ -29,17 +29,22 @@ function buildQueryParams(params) {
 
 
   // Fungsi POST data
-  export async function postProduk(path, data, queryParams = {}) {
-    const url = `${API_BASE_URL}/api/${path}${buildQueryParams(queryParams)}`
-    let options = { method: 'POST' }
-  
-    // Jika data adalah FormData (upload file)
-    if (data instanceof FormData) {
-      options.body = data
+  export async function postProduk(pathOrFormData, formDataMaybe) {
+    let path = 'produks'
+    let data = null
+    if (formDataMaybe === undefined && pathOrFormData instanceof FormData) {
+      data = pathOrFormData
     } else {
-      // Jika data biasa (JSON)
-      options.headers = { 'Content-Type': 'application/json' }
-      options.body = JSON.stringify(data)
+      path = pathOrFormData
+      data = formDataMaybe
+    }
+  
+    const url = `${API_BASE_URL}/api/${path}`
+  
+    const options = {
+      method: 'POST',
+      body: data instanceof FormData ? data : JSON.stringify(data),
+      headers: data instanceof FormData ? {} : { 'Content-Type': 'application/json', Accept: 'application/json' }
     }
   
     const res = await fetch(url, options)
@@ -50,37 +55,37 @@ function buildQueryParams(params) {
 
   // Fungsi PUT data
   export async function updateProduk(id, data, queryParams = {}) {
-    const url = `${API_BASE_URL}/api/produks/${id}${buildQueryParams(queryParams)}`;
-
-    const headers = { Accept: 'application/json' };
-
+    const url = `${API_BASE_URL}/api/produks/${id}${buildQueryParams(queryParams)}`
+  
+    const headers = { Accept: 'application/json' }
+  
     if (data instanceof FormData) {
-      data.append('_method', 'PUT')
-      const res = await fetch(url, {
-        method: 'POST', // Laravel accepts post+_method=PUT for multipart
-        headers, 
-        body: data
-      });
-      if (!res.ok) throw new Error(`PUT Error: ${res.status}`);
-      return res.json();
+      data.append('_method', 'PUT') // Laravel: POST + _method=PUT
+      const res = await fetch(url, { method: 'POST', body: data, headers })
+      if (!res.ok) throw new Error(`PUT Error: ${res.status}`)
+      return res.json()
     } else {
       const res = await fetch(url, {
-      method: 'PUT',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(data)
-      });
-      if (!res.ok) throw new Error(`PUT Error: ${res.status}`);
-      return res.json();
-    
-      }
+        method: 'PUT',
+        headers: { ...headers, 'Content-Type': 'application/json' },
+        body: JSON.stringify(data)
+      })
+      if (!res.ok) throw new Error(`PUT Error: ${res.status}`)
+      return res.json()
+    }
   }
 
   // Fungsi DELETE data
-  export async function deleteData(path, queryParams = {}) {
-    const url = `${API_BASE_URL}/api/${path}${buildQueryParams(queryParams)}`;
-    const res = await fetch(url, { method: 'DELETE' });
-    if (!res.ok && res.status !== 204) throw new Error(`DELETE Error: ${res.status}`);
-    
-    if (res.status === 204) return null;
-    return res.json();
+  export async function deleteProduk(id) {
+    const url = `${API_BASE_URL}/api/produks/${id}`
+    const res = await fetch(url, { method: 'DELETE', headers: { Accept: 'application/json' } })
+    if (!res.ok) throw new Error(`DELETE Error: ${res.status}`)
+    return res.ok
+  }
+  
+  /* ---------- helper to compose full image URL ---------- */
+  export function fullImageUrl(path) {
+    if (!path) return null
+    // backend menyimpan path relatif: 'temp/xxx.png' atau 'gambar_produk/xxx.png'
+    return `${API_BASE_URL}/storage/${path}`
   }
