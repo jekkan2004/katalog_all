@@ -18,7 +18,7 @@ function buildQueryParams(params) {
   }
 
   // Fungsi GET data BY ID
-  export async function getData(id, queryParams = {}) {
+  export async function getDataByID(id, queryParams = {}) {
     const url = `${API_BASE_URL}/api/produks/${id}${buildQueryParams(queryParams)}`;
     const res = await fetch(url);
     if (!res.ok) {
@@ -43,8 +43,7 @@ function buildQueryParams(params) {
   
     const options = {
       method: 'POST',
-      body: data instanceof FormData ? data : JSON.stringify(data),
-      headers: data instanceof FormData ? {} : { 'Content-Type': 'application/json', Accept: 'application/json' }
+      body: data 
     }
   
     const res = await fetch(url, options)
@@ -76,7 +75,7 @@ function buildQueryParams(params) {
   }
 
   // Fungsi DELETE data
-  export async function deleteProduk(id) {
+  export async function deleteData(id) {
     const url = `${API_BASE_URL}/api/produks/${id}`
     const res = await fetch(url, { method: 'DELETE', headers: { Accept: 'application/json' } })
     if (!res.ok) throw new Error(`DELETE Error: ${res.status}`)

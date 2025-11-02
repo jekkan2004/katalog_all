@@ -2,7 +2,7 @@ import { createRouter, createWebHistory } from 'vue-router';
 import Home from '../views/index.vue';
 import DaftarKatalog from '../views/adminProduk.vue';
 import FormInputKatalog from '../components/form_inputkatalog.vue';
-import AdminProduk from '../views/adminProduk.vue';
+//import AdminProduk from '../views/adminProduk.vue';
 
 const routes = [
   {

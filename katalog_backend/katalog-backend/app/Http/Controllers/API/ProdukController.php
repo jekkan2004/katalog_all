@@ -40,10 +40,12 @@ class ProdukController extends Controller
             'nama_produk' => 'required|string|max:255',
             'harga_produk' => 'nullable|integer',
             'deskripsi_produk' => 'nullable|string',
-            'gambar' => 'nullable|file|mimes:jpg,jpeg,png|max:2048',
+            'gambar.*' => 'nullable|file|mimes:jpg,jpeg,png|max:2048',
         ]);
 
         $data['slug'] = Str::slug($data['nama_produk'], '-');
+
+        
 
         $produk = Produk::create($data);
 
@@ -105,8 +107,7 @@ class ProdukController extends Controller
         //         'data' => $data
         //     ]);
 
-        //     return response()->json(['message' => 'Failed to create product'], 500);
-        // }
+        //     return response()->json(['message' => 
     }
 
     /**
@@ -130,7 +131,7 @@ class ProdukController extends Controller
             'nama_produk' => 'sometimes|required|string|max:255',
             'harga_produk' => 'sometimes|nullable|numeric',
             'deskripsi_produk' => 'sometimes|nullable|string',
-            'gambar' => 'nullable|file|image|max:2048',
+            'gambar.*' => 'nullable|file|mimes:jpg,jpeg,png|max:2048',
         ]);
 
         // Jika nama_produk dikirim, update slug

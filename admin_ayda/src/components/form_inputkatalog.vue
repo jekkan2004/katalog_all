@@ -37,19 +37,24 @@
           <label class="block font-medium mb-1">Gambar Produk</label>
           <input
             type="file"
+            multiple
             @change="handleFileUpload"
             class="w-full border rounded p-2"
             accept="image/*"
           />
-          
-          <p v-if="previewUrl" class="mt-2 text-sm text-gray-600">Preview:</p>
-          <img
-            v-if="previewUrl"
-            :src="previewUrl"
-            alt="Preview"
-            class="w-32 mt-2 rounded shadow"
-          />
         </div>
+
+          <!-- preview gambar baru-->
+          <div v-if="previews.length" class="flex gap-2 mt-3 flex-wrap">
+            <div v-for="(p, i) in previews" :key="i" class="relative">
+              <img :src="p" class="w-24 h-24 object-cover rounded shadow" />
+              <button type="button" @click="removeNewImage(i)" class="absolute -top-2 -right-2 bg-red-600 text-white rounded-full w-6 h-6 text-xs">×</button>
+            </div>
+          </div>
+
+          <p class="text-sm text-gray-500 mt-2">
+            Jumlah gambar sekarang: {{ previews.length }} / 5
+          </p>
   
         <div class="flex gap-2">
         <button
@@ -79,7 +84,7 @@
 
 <script setup>
 import { ref, watch } from 'vue'
-import { postProduk, updateProduk } from '../api/api.js'
+import { postProduk, updateProduk  } from '../api/api.js'
 
 const props = defineProps({
   selectedProduk: {
@@ -93,12 +98,12 @@ const emit = defineEmits(['produk-added', 'produk-updated', 'cancel-edit'])
 const form = ref({
   nama_produk: '',
   harga_produk: '',
-  deskripsi_produk: '',
-  gambar: null
+  deskripsi_produk: ''
 })
 
-const editMode = ref(false)
-const previewUrl = ref(null)
+  const newFiles = ref([])      // menyimpan file yang dipilih
+  const previews = ref([])      // menyimpan blob URL preview
+  const editMode = ref(false)
 
 watch(
   () => props.selectedProduk,
@@ -108,10 +113,9 @@ watch(
       form.value = {
         nama_produk: newVal.nama_produk,
         harga_produk: newVal.harga_produk,
-        deskripsi_produk: newVal.deskripsi_produk,
-        gambar: null
+        deskripsi_produk: newVal.deskripsi_produk
       }
-      previewUrl.value = newVal.gambar_url || null
+      // previewUrl.value = newVal.gambar_url || null
     } else {
       resetForm()
     }
@@ -121,9 +125,25 @@ watch(
 )
 
 function handleFileUpload(event) {
-  const file = event.target.files[0]
-  form.value.gambar = file
-  previewUrl.value = file ? URL.createObjectURL(file) : null
+  const files = Array.from(event.target.files)
+
+  // batasi maksimal 5 file total
+  const allowed = 5 - newFiles.value.length
+  const selected = files.slice(0, allowed)
+
+  selected.forEach(file => {
+    newFiles.value.push(file)
+    previews.value.push(URL.createObjectURL(file))
+  })
+
+  event.target.value = '' // reset input agar bisa pilih ulang file sama
+}
+
+// hapus gambar baru dari preview
+function removeNewImage(index) {
+  URL.revokeObjectURL(previews.value[index])
+  previews.value.splice(index, 1)
+  newFiles.value.splice(index, 1)
 }
 
 async function submitForm() {
@@ -131,7 +151,13 @@ async function submitForm() {
   formData.append('nama_produk', form.value.nama_produk)
   formData.append('harga_produk', form.value.harga_produk)
   formData.append('deskripsi_produk', form.value.deskripsi_produk)
-  if (form.value.gambar) formData.append('gambar', form.value.gambar)
+
+  // TAMBAH: kirim semua file sebagai gambar[]
+  newFiles.value.forEach((file) => {
+    if (file) formData.append('gambar[]', file)
+  })
+
+  console.log('FormData yang dikirim:', [...formData])
 
   try {
     let res
@@ -156,15 +182,16 @@ function cancelEdit() {
   resetForm()
 }
 
+// reset semua data (termasuk preview)
 function resetForm() {
   editMode.value = false
   form.value = {
     nama_produk: '',
     harga_produk: '',
-    deskripsi_produk: '',
-    gambar: null
+    deskripsi_produk: ''
   }
-  previewUrl.value = null
+  newFiles.value = []
+  previews.value = []
 }
 </script>
   
