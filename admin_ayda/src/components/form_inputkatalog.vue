@@ -23,6 +23,23 @@
           />
         </div>
 
+        <div class="mt-4">
+        <label class="font-semibold">Fasilitas:</label>
+        <div class="grid grid-cols-2 md:grid-cols-3 gap-2 mt-2">
+          <div v-for="item in fasilitasList" :key="item.id">
+            <label class="flex items-center gap-2">
+              <input
+                type="checkbox"
+                :value="item.id"
+                v-model="form.selectedFasilitas"
+                class="rounded border-gray-300"
+              />
+              <span>{{ item.nama_fasilitas }}</span>
+            </label>
+          </div>
+        </div>
+      </div>
+
         <div>
           <label class="block font-medium mb-1">Deskripsi Produk</label>
           <textarea
@@ -83,8 +100,14 @@
   
 
 <script setup>
-import { ref, watch } from 'vue'
-import { postProduk, updateProduk  } from '../api/api.js'
+import { ref, watch, onMounted } from 'vue'
+import { postProduk, updateProduk, getFasilitas  } from '../api/api.js'
+
+  const fasilitasList = ref([])
+
+  onMounted(async () => {
+    fasilitasList.value = await getFasilitas()
+  })
 
 const props = defineProps({
   selectedProduk: {
@@ -98,7 +121,8 @@ const emit = defineEmits(['produk-added', 'produk-updated', 'cancel-edit'])
 const form = ref({
   nama_produk: '',
   harga_produk: '',
-  deskripsi_produk: ''
+  deskripsi_produk: '',
+  selectedFasilitas: []
 })
 
   const newFiles = ref([])      // menyimpan file yang dipilih
@@ -151,6 +175,11 @@ async function submitForm() {
   formData.append('nama_produk', form.value.nama_produk)
   formData.append('harga_produk', form.value.harga_produk)
   formData.append('deskripsi_produk', form.value.deskripsi_produk)
+  //formData.append('fasilitas', JSON.stringify(selectedFasilitas.value))
+
+  form.value.selectedFasilitas.forEach((id) => {
+  formData.append('fasilitas[]', id)
+  })
 
   // TAMBAH: kirim semua file sebagai gambar[]
   newFiles.value.forEach((file) => {
@@ -165,7 +194,7 @@ async function submitForm() {
       res = await updateProduk(props.selectedProduk.id, formData)
       emit('produk-updated', res.data)
     } else {
-      res = await postProduk('produks', formData)
+      res = await postProduk(formData)
       emit('produk-added', res.data)
     }
 
@@ -182,13 +211,16 @@ function cancelEdit() {
   resetForm()
 }
 
+ /* END FUNCTION UNTUK PRODUK */
+
 // reset semua data (termasuk preview)
 function resetForm() {
   editMode.value = false
   form.value = {
     nama_produk: '',
     harga_produk: '',
-    deskripsi_produk: ''
+    deskripsi_produk: '',
+    selectedFasilitas: []
   }
   newFiles.value = []
   previews.value = []

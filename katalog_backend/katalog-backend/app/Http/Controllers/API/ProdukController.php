@@ -17,6 +17,7 @@ class ProdukController extends Controller
     public function index()
     {
         $produk = Produk::all();
+        $produks = Produk::with(['gambars', 'fasilitas'])->get();
         return response()->json($produk);
     }
 
@@ -45,7 +46,11 @@ class ProdukController extends Controller
 
         $data['slug'] = Str::slug($data['nama_produk'], '-');
 
-        
+        $originalSlug = $data['slug'];
+        $counter = 1;
+        while (Produk::where('slug', $data['slug'])->exists()) {
+            $data['slug'] = $originalSlug . '-' . $counter++;
+        }
 
         $produk = Produk::create($data);
 
@@ -60,6 +65,17 @@ class ProdukController extends Controller
 
                 $produk->gambars()->create(['path' => $path]);
             }
+        }
+
+        if ($request->has('fasilitas')) {
+            $fasilitas = $request->fasilitas;
+        
+            // Jika frontend kirim string JSON seperti "[5,6,7]"
+            if (is_string($fasilitas)) {
+                $fasilitas = json_decode($fasilitas, true);
+            }
+        
+            $produk->fasilitas()->sync($fasilitas);
         }
 
         //Kembalikan response JSON
@@ -115,6 +131,7 @@ class ProdukController extends Controller
      */
     public function show(Produk $produk)
     {
+        $produks = Produk::with(['gambars', 'fasilitas'])->get();
         return response()->json($produk);
     }
 

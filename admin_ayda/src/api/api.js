@@ -88,3 +88,32 @@ function buildQueryParams(params) {
     // backend menyimpan path relatif: 'temp/xxx.png' atau 'gambar_produk/xxx.png'
     return `${API_BASE_URL}/storage/${path}`
   }
+  
+  // ---------- END API PRODUK ---------------------------------------------------------------------------
+
+  // API FASILITAS
+
+  export async function getFasilitas(queryParams = {}) {
+    const url = `${API_BASE_URL}/api/fasilitas${buildQueryParams(queryParams)}`;
+    const res = await fetch(url);
+    if (!res.ok) {
+      throw new Error(`GET Error: ${res.status}`);
+    }
+    return res.json();
+  }
+  
+  export async function postFasilitas(data) {
+    const res = await fetch(`${API_BASE_URL}/api/fasilitas`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(data)
+    })
+    if (!res.ok) throw new Error('Gagal tambah fasilitas')
+    return await res.json()
+  }
+  
+  export async function deleteFasilitas(id) {
+    const res = await fetch(`${API_BASE_URL}/fasilitas/${id}`, { method: 'DELETE' })
+    if (!res.ok) throw new Error('Gagal hapus fasilitas')
+    return await res.json()
+  }

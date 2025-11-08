@@ -3,6 +3,7 @@
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\API\ProdukController;
+use App\Http\Controllers\API\FasilitasController;
 
 /*
 |--------------------------------------------------------------------------
@@ -19,10 +20,7 @@ Route::get('/ping', function () {
     return response()->json(['message' => 'API OK']);
 });
 
-// Route::get('/produks', [ProdukController::class, 'getAll']);
-// Route::post('/produks', [ProdukController::class, 'store']);
-// Route::get('/produks/{produk}', [ProdukController::class, 'show']);
-// // Route::put('produks/{id}', [ProdukController::class, 'update']);
-// Route::delete('/produks/{produk}', [ProdukController::class, 'destroy']);
+
 Route::apiResource('produks', App\Http\Controllers\API\ProdukController::class);
+Route::apiResource('fasilitas', App\Http\Controllers\API\FasilitasController::class);
 

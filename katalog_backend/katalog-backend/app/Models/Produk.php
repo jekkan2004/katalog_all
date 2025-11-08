@@ -31,6 +31,11 @@ class Produk extends Model
         });
     }
 
+    public function fasilitas()
+    {
+        return $this->belongsToMany(Fasilitas::class, 'fasilitas_produk', 'produk_id', 'fasilitas_id');
+    }
+
      // otomatis tambahkan gambar_url di JSON
     //  protected $appends = ['gambar_url'];
 

@@ -1,0 +1,2 @@
+Apakah kamu ingin saya lanjutkan bagian tampilan tabel produk (menampilkan fasilitas di list + tombol edit/delete) juga, biar CRUD-nya komplit di sisi FE?
+Atau mau fokus dulu memastikan relasi dan input fasilitas di produk sudah jalan (POST → DB)?

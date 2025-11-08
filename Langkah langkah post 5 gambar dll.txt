@@ -1,0 +1,7 @@
+Keren — siap lanjut ke Frontend. Saya akan berikan langkah-langkah terstruktur + kode siap pakai, dan saya tandai secara jelas bagian yang diubah dibandingkan implementasi lama (single gambar) supaya kamu tahu persis apa yang dimodifikasi. Semua penjelasan pakai bahasa Indonesia seperti minta kamu. 🚀 Ringkasan singkat sebelum mulai: Backend sudah diubah jadi relasi 1 produk — banyak gambar (produk_gambars). Saat GET produk, response sekarang berisi relasi gambars (array) yang tiap item punya path (contoh: temp/xxx.png). Di frontend kita akan membentuk URL gambar lengkap jadi: API_BASE_URL + '/storage/' + path.
+
+
+
+“Upload banyak gambar produk Vue + Laravel”
+atau mau nama lain seperti
+“Relasi produk dan gambar di Katalog Ayda”?
