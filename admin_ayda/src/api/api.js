@@ -88,6 +88,15 @@ function buildQueryParams(params) {
     // backend menyimpan path relatif: 'temp/xxx.png' atau 'gambar_produk/xxx.png'
     return `${API_BASE_URL}/storage/${path}`
   }
+
+  // DELETE single gambar milik produk
+export async function deleteGambar(produkId, gambarId) {
+  const url = `${API_BASE_URL}/api/produks/${produkId}/gambars/${gambarId}`;
+  const res = await fetch(url, { method: 'DELETE', headers: { Accept: 'application/json' } });
+  if (!res.ok) throw new Error(`DELETE Gambar Error: ${res.status}`);
+  return res.json();
+}
+
   
   // ---------- END API PRODUK ---------------------------------------------------------------------------
 

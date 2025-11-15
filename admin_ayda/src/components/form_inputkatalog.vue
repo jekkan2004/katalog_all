@@ -70,8 +70,15 @@
           </div>
 
           <p class="text-sm text-gray-500 mt-2">
-            Jumlah gambar sekarang: {{ previews.length }} / 5
+            Jumlah gambar sekarang: {{ totalImages }} / 5
           </p>
+
+          <div v-if="existingImages.length" class="flex gap-2 mt-3 flex-wrap">
+            <div v-for="(img, idx) in existingImages" :key="img.id" class="relative">
+              <img :src="img.url" class="w-24 h-24 object-cover rounded shadow" />
+              <button type="button" @click="onDeleteExistingImage(img.id, idx)" class="absolute -top-2 -right-2 bg-red-600 text-white rounded-full w-6 h-6 text-xs">×</button>
+            </div>
+          </div>
   
         <div class="flex gap-2">
         <button
@@ -101,7 +108,7 @@
 
 <script setup>
 import { ref, watch, onMounted } from 'vue'
-import { postProduk, updateProduk, getFasilitas  } from '../api/api.js'
+import { postProduk, updateProduk, getFasilitas, fullImageUrl,deleteGambar  } from '../api/api.js'
 
   const fasilitasList = ref([])
 
@@ -128,6 +135,14 @@ const form = ref({
   const newFiles = ref([])      // menyimpan file yang dipilih
   const previews = ref([])      // menyimpan blob URL preview
   const editMode = ref(false)
+  const existingImages = ref([])
+
+  import { computed } from 'vue'
+
+  const totalImages = computed(() => {
+    return existingImages.value.length + previews.value.length
+  })
+  
 
 watch(
   () => props.selectedProduk,
@@ -137,8 +152,16 @@ watch(
       form.value = {
         nama_produk: newVal.nama_produk,
         harga_produk: newVal.harga_produk,
-        deskripsi_produk: newVal.deskripsi_produk
+        deskripsi_produk: newVal.deskripsi_produk,
+        selectedFasilitas: (newVal.fasilitas || []).map(f => f.id)
       }
+
+      existingImages.value = (newVal.gambars || []).map(g => ({
+        id: g.id,
+        path: g.path,
+        url: fullImageUrl(g.path)
+      }))
+      
       // previewUrl.value = newVal.gambar_url || null
     } else {
       resetForm()
@@ -151,8 +174,12 @@ watch(
 function handleFileUpload(event) {
   const files = Array.from(event.target.files)
 
-  // batasi maksimal 5 file total
-  const allowed = 5 - newFiles.value.length
+  const allowed = 5 - existingImages.value.length - newFiles.value.length
+  if (allowed <= 0) {
+    alert("Maksimal 5 gambar")
+    return
+  }
+
   const selected = files.slice(0, allowed)
 
   selected.forEach(file => {
@@ -160,7 +187,7 @@ function handleFileUpload(event) {
     previews.value.push(URL.createObjectURL(file))
   })
 
-  event.target.value = '' // reset input agar bisa pilih ulang file sama
+  event.target.value = ''
 }
 
 // hapus gambar baru dari preview
@@ -186,6 +213,8 @@ async function submitForm() {
     if (file) formData.append('gambar[]', file)
   })
 
+  
+
   console.log('FormData yang dikirim:', [...formData])
 
   try {
@@ -206,6 +235,20 @@ async function submitForm() {
   }
 }
 
+  async function onDeleteExistingImage(gambarId, idx) {
+    if (!confirm('Hapus gambar ini?')) return;
+    try {
+      // panggil API untuk hapus gambar
+      await deleteGambar(props.selectedProduk.id, gambarId);
+      // hapus dari UI
+      existingImages.value.splice(idx, 1);
+      alert('Gambar dihapus');
+    } catch (err) {
+      console.error('Gagal hapus gambar:', err);
+      alert('Gagal hapus gambar');
+    }
+  }
+
 function cancelEdit() {
   emit('cancel-edit')
   resetForm()
@@ -224,6 +267,7 @@ function resetForm() {
   }
   newFiles.value = []
   previews.value = []
+  existingImages.value = []
 }
 </script>
   

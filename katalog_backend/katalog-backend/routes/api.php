@@ -20,7 +20,10 @@ Route::get('/ping', function () {
     return response()->json(['message' => 'API OK']);
 });
 
-
+// untuk produk
 Route::apiResource('produks', App\Http\Controllers\API\ProdukController::class);
+Route::delete('/produks/{produk}/gambars/{gambarid}', [ProdukController::class, 'destroyGambar']);
+
+
 Route::apiResource('fasilitas', App\Http\Controllers\API\FasilitasController::class);
 

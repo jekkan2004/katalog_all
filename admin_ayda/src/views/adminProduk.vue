@@ -34,7 +34,7 @@
   // ambil data produk dari backend
   async function fetchProduk() {
     try {
-      const res = await getData('produks')
+      const res = await getData()
       produks.value = res.data || res
     } catch (err) {
       console.error('Gagal ambil data produk:', err)
@@ -52,7 +52,7 @@
   async function deleteProduk(id) {
     if (!confirm('Yakin ingin menghapus produk ini?')) return
     try {
-      await deleteData(`produks/${id}`)
+      await deleteData(id)
       alert('Produk berhasil dihapus!')
       fetchProduk()
     } catch (err) {
